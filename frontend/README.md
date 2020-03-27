@@ -1,68 +1,110 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<h1>Projeto com React</h1>
 
-## Available Scripts
+- Remover alguns arquivos que não iremos utilizar:
 
-In the project directory, you can run:
+- [Projeto com ReactJS Parte 1 (Inicio)](https://github.com/mrcarromesa/react-parte1)
 
-### `yarn start`
+- Exemplo de como repassar itens dentro de um componente via propriedades para outro componente:
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```js
+//App.js
+import React from 'react';
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+import Header from './components/Header';
 
-### `yarn test`
+function App() {
+// Queremos enviar o Semana Omnistack para o component Header.
+  return <Header>Semana Omnistack</Header>;
+}
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+export default App;
+```
 
-### `yarn build`
+```js
+import React from 'react';
+import PropTypes from 'prop-types';
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+function Header({ children }) {
+  return (
+    <header>
+      {/*Recebe a propriedade do component aqui*/}
+      <h1>{children}</h1>
+    </header>
+  );
+}
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+Header.propTypes = {
+  children: PropTypes.element.isRequired,
+};
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+export default Header;
 
-### `yarn eject`
+```
+---
+<h2>Melhorar produtividade no vscode</h2>
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+- Para transformar isso: `div.minhaclass>p` nisso:
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```js
+<div className="minhaclass"><p></p></div>
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- Abra as configurações em JSON do VS Code e adicione/altere o seguinte:
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```json
+"emmet.syntaxProfiles": {
+    "javascript": "jsx",
+},
 
-## Learn More
+"emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+},
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+<h2>Icons</h2>
 
-### Code Splitting
+- Utilizar um pacote de icons completo, instalar:
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+```bash
+yarn add react-icons
+```
 
-### Analyzing the Bundle Size
+- Nesse projeto foi utilizado o pacote [Feather Icons](https://feathericons.com)
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
 
-### Making a Progressive Web App
+---
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+<h2>Rotas</h2>
 
-### Advanced Configuration
+- Instalar o pacote de rotas:
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+```bash
+yarn add react-router-dom
+```
 
-### Deployment
+---
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+<h2>Acessar API</h2>
 
-### `yarn build` fails to minify
+- Instalar o axios:
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+```bash
+yarn add axios
+```
+
+- Criar o arquivo `src/services/api.js` com o seguinte conteúdo:
+
+```js
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://localhost:3333',
+});
+
+export default api;
+
+```
+
+- Depois importar nos outros arquivos que fará chamada de api.
