@@ -17,17 +17,11 @@
 
 <h2>Front-end</h2>
 
-<video width="400" controls>
-  <source src="./repo/front_end.mp4" type="video/mp4">
-  Your browser does not support HTML5 video.
-</video>
+[![Assitir ao vídeo](./repo/img_front_end.jpg)](https://youtu.be/sUEd_iT9q-w)
 
 ---
 
 <h2>Mobile</h2>
 
-<video width="400" controls>
-  <source src="./repo/mobile.mp4" type="video/mp4">
-  Your browser does not support HTML5 video.
-</video>
+[![Assitir ao vídeo](./repo/img_mobile.jpg)](https://youtu.be/ME3S1mSZASQ)
 
