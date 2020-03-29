@@ -532,3 +532,369 @@ app.use(cors({
   origin: 'http://....'
 }));
 ```
+
+---
+
+<h2>Recursos Avançados</h2>
+
+<h2>Celebrate</h2>
+
+O Celebrate utiliza o Joi a documentação de como utilizar o JOI, vc encontra em:
+
+[JOI](https://hapi.dev/module/joi/)
+
+
+- Instalação, no momento o `celebrate` não estava disponível no yarn, então foi necessário instalar via npm: :
+
+```bash
+npm i celebrate
+```
+
+- Depois removi o arquivo package.json.lock, e executei o comando no terminal:
+
+```bash
+yarn
+```
+
+- Implementar:
+
+- No arquivo `routes.js` adicionar a importação:
+
+```js
+import { celebrate, Joi, Segments } from 'celebrate';
+```
+
+- E na rota adicionar um middleware:
+
+```js
+routes.post('/ongs', celebrate({
+    [Segments.BODY]: Joi.object().keys({
+        name: Joi.string().required(),
+        email: Joi.string().required().email(),
+        whatsapp: Joi.string().required().min(10).max(11),
+        city: Joi.string().required(),
+        uf: Joi.string().required().length(2)
+    })
+}), OngController.create);
+```
+
+- Isso são os parametros que o Joi consegue validar:
+
+```js
+PARAMS        = 'params',
+HEADERS       = 'headers',
+QUERY         = 'query',
+COOKIES       = 'cookies',
+SIGNEDCOOKIES = 'signedCookies',
+BODY          = 'body',
+```
+
+- Para adicionar ao celebrate precisa sempre estar entre cochetes.
+
+- E por fim adicionamos o `Joi.object().keys({ ... })`
+
+---
+
+- Para personalizar o retorno do erro bem como as mensagens no arquivo `src/index.js` importar o seguinte:
+
+```js
+import { errors } from 'celebrate';
+```
+
+- adicionar o seguinte logo após `app.use(routes);` adicionar o seguinte: 
+
+```js
+app.use(errors());
+```
+
+- Para validação do header é um pouco diferente:
+
+```js
+routes.get('/profile', celebrate({
+    [Segments.HEADERS]: Joi.object({
+        authorization: Joi.string().required() 
+    }).unknown()
+}), ProfileController.index);
+```
+
+- Validação com Params:
+
+```js
+routes.delete('/incidents/:id', celebrate({
+    [Segments.PARAMS]: Joi.object().keys({
+        id: Joi.number().required()
+    })
+}), IncidentController.delete);
+```
+
+- Validação com Query:
+
+```js
+routes.get('/incidents', celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+        page: Joi.number()
+    })
+}), IncidentController.index);
+```
+
+----
+
+<h2>Testes</h2>
+
+Por que? Aplicações com poucas telas nem sempre faz sentido realizar testes, mas aplicações com várias telas é interessante realização de testes,
+
+- E para isso utilizamos o TDD (Test-driven Development).
+
+Esse teste é feito antes mesmo de escrever a aplicação e ele ajuda a verificar se a regra de negócio está sendo aplicada ou não, e ajuda a se policiar, pois se deixar para fazer depois, vem as desculpas: "Não tem tempo", "Tem outras coisas importantes para fazer"...
+
+- Para realizar os testes vamos utilizar o framework de testes que é o [Jest](https://jestjs.io/docs/en/api):
+
+```bash
+yarn add jest -D
+```
+
+- Iniciando o `jest`:
+
+```bash
+yarn jest --init
+```
+
+`Would you like to use Jest when running "test" script in "package.json"?`
+
+- Responder `Y`
+
+`Choose the test environment that will be used for testing`
+
+- Manter o `node` pressionar enter
+
+`Do you want Jest to add coverage reports?`
+
+- Responder com `N`
+
+`Automatically clear mock calls and instances between every test?` => Se o que executamos em um teste não seja válido para outro teste.
+
+- Responder com `y`
+
+- Por fim será criado um arquivo `jest.config.js`
+
+- E também cria a chamada para o teste no `package.json`
+
+- Na raíz do projeto criamos uma pasta chamada `tests`
+
+- Temos testes unitários daí para criamos a pasta `tests/unit` testa uma parte da aplicação de forma isolada.
+
+- Temos testes de integração que daí criamos a pasta `tests/integration` testa por completo uma funcionalidade 
+
+- Há outros também mas esses são mais utilizados.
+
+---
+
+<h2>Utilizar import/export</h2>
+
+- Instalar Sucrase Jest plugin:
+
+```js
+yarn add --dev @sucrase/jest-plugin
+```
+
+- No arquivo `jest.config.js` adicionar o seguinte:
+
+```json
+ transform: {
+    ".(js|jsx|ts|tsx)": "@sucrase/jest-plugin"
+  },
+```
+
+- E no `nodemon.js` para evitar que a pasta `tests` seja monitorada pelo nodemon, adicionar o seguinte:
+
+```js
+"ignore": ["tests"]
+```
+
+---
+
+<h2>Teste Unitário</h2>
+
+- Criar o arquio `tests/unit/generateUniqueId.spec.js` ou seja é o mesmo nome do arquivo que queremos testar porém com `.spec.js` no final, e adicionar o seguinte conteúdo:
+
+```js
+import generateUniqueId from '../../src/utils/generateUniqueId';
+
+describe('Generete Unique ID', () => {
+    // o it aqui significa isto.
+    it('should generate a unique ID', () => {
+        // o expect espera que alguma coisa aconteça
+        //expect(2 + 2).toBe(5);
+        const id = generateUniqueId();
+
+        expect(id).toHaveLength(8);
+    })
+});
+```
+
+- Para executar o teste executar o comando:
+
+```bash
+yarn test
+```
+
+---
+
+<h2>Realizando test com script que realiza transações no banco de dados</h2>
+
+- No arquivo `knexfile.js` adicionar as configurações para uma base para testes:
+
+```js
+test: {
+    client: 'sqlite3',
+    connection: {
+      filename: './src/database/test.sqlite'
+    },
+    migrations: {
+      directory: './src/database/migrations'
+    },
+    useNullAsDefault: true
+  },
+```
+
+- Para diferenciar o ambiente de tests do de desenvolvimento/production instalar o seguinte:
+
+```bash
+yarn add cross-env 
+```
+
+- No arquivo `package.json` adicionar o seguinte em `"scripts":{"tests"}`:
+
+```js
+"test": "cross-env NODE_ENV=test jest"
+```
+
+- Dessa forma teremos acesso a uma variavel de ambiente que estará definida como `test`, dessa forma podemos escolher a configuração da base de dados que queremos utilizar.
+
+- Agora no arquivo `src/database/connections.js` altere para o seguinte:
+
+```js
+import knex from 'knex';
+import configuration from '../../knexfile';
+
+const config = process.env.NODE_ENV === 'test' ? configuration.test : configuration.development;
+
+const connection = knex(config);
+
+export default connection;
+
+```
+
+- Agora com tudo configurado criamos o teste de integração
+
+---
+
+<h2>Realizar as chamadas de API</h2>
+
+- O axios utilizamos para o front-end
+
+- Porém para realização de testes utilizamos o [supertest](https://github.com/visionmedia/supertest):
+
+```bash
+yarn add supertest -D
+```
+
+- 
+---
+
+<h2>Antes de continuar, algumas modificações necessárias</h2>
+
+- Alterar o nome do arquivo `src/index.js` para `src/app.js` e remover de dentro do arquivo o seguinte:
+
+```js
+app.listen(3333);
+```
+
+- E adicionar o seguinte no final do arquivo:
+
+```js
+export default app;
+```
+
+- Criar o arquivo `src/server.js` e adicionar o seguinte:
+
+```js
+import app from './app';
+app.listen(3333);
+```
+
+- Alterar no arquivo `package.json` `"scripts":{"start"}`:
+
+```json
+"dev": "nodemon src/server.js",
+"start": "nodemon src/server.js",
+```
+
+---
+
+<h2>Criando test de integração</h2>
+
+- Criar o arquivo `test/integration/ong.spec.js` com o seguinte conteudo:
+
+```js
+import request from 'supertest';
+
+import app from '../../src/app';
+
+import connection from '../../src/database/connection';
+
+describe('ONG', () => {
+    // Antes de cada teste executar a migration
+    beforeEach(async () => {
+        //Limpar a base de dados antes de executar os testes
+        await connection.migrate.rollback()
+        await connection.migrate.latest()
+    });
+
+
+    // Encerrar a conexão com a base para não ficar aberta após os testes:
+
+    afterAll(async () => {
+        await connection.destroy();
+    });
+
+    // Executar apos executar todoas as migrations
+    it('should be able to create a new ONG', async () => {
+        const response = await request(app).post('/ongs').send({
+            name: "Teste",
+            email: "teste@teste.com",
+            whatsapp: "4700000000",
+            city: "Timbó",
+            uf: "SC"
+        });
+        expect(response.body).toHaveProperty('id');
+        expect(response.body.id).not.toBeNull();
+    });
+
+
+});
+```
+---
+
+<h2>Deploy de Aplicação Node</h2>
+
+- [Hospedagem](https://www.heroku.com)
+
+- Como fazer: [Deploy de aplicação NodeJS e ReactJS no Heroku | Diego Fernandes](https://www.youtube.com/watch?v=-j7vLmBMsEU)
+
+- Configurar um servidor digital ocean: [Deploy de apps Node.js | Masterclass #03](https://www.youtube.com/watch?v=ICIz5dE3Xfg)
+
+
+---
+
+<h2>Deploy de Aplicação ReactJS</h2>
+
+- [netlify](https://www.netlify.com)
+
+
+---
+
+<h2>Deploy React Native Expo</h2>
+
+- [Gerando APK (Android) e IPA (iOS) com React Native & Expo | Code/Drops #15](https://www.youtube.com/watch?v=wYMvzbfBdYI)
+
